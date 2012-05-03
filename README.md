@@ -3,6 +3,20 @@ MotionOrientation
 
 An observer to notify the orientation of iOS device changed, using CoreMotion for taking the orientation in &#39;Orientation Lock&#39;.
 
+
+Requirements
+============
+
+This codes are under ARC.
+
+These frameworks are needed.
+
+<pre>
+CoreMotion.framework
+CoreGraphics.framework
+</pre>
+
+
 Usage
 =====
 

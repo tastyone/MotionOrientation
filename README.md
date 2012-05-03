@@ -4,13 +4,21 @@ MotionOrientation
 An observer to notify the orientation of iOS device changed, using CoreMotion for taking the orientation in &#39;Orientation Lock&#39;.
 
 Usage
-<code>
+=====
+
+Run below.
+
+<pre>
 [MotionOrientation initialize];
-/* ... */
-</code>
+</pre>
 
-You can receive notifications below.
+Then you can receive notifications below.
 
-MotionOrientationChangedNotification when the device orientation changed.
-MotionOrientationInterfaceOrientationChangedNotification when the interface orientation changed.
+<strong>MotionOrientationChangedNotification</strong>, when the device orientation changed.
+<strong>MotionOrientationInterfaceOrientationChangedNotification</strong>, just when the interface orientation changed.
 
+And then you can retrieve orientation informations.
+<pre>
+UIInterfaceOrientation interfaceOrientation = [MotionOrientation sharedInstance].interfaceOrientation;
+UIDeviceOrientation deviceOrientation = [MotionOrientation sharedInstance].deviceOrientation;
+</pre>

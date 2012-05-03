@@ -39,7 +39,6 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedInstance = [[MotionOrientation alloc] init];
-        // Do any other initialisation stuff here
     });
     return sharedInstance;
 }
@@ -52,10 +51,6 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
     self.motionManager.accelerometerUpdateInterval = 0.1;
     if ( ![self.motionManager isAccelerometerAvailable] ) {
         NSLog(@"MotionOrientation - Accelerometer is NOT available");
-        return;
-    }
-    if ( ![self.motionManager isAccelerometerActive] ) {
-        NSLog(@"MotionOrientation - Accelerometer is NOT active");
         return;
     }
     [self.motionManager startAccelerometerUpdatesToQueue:self.operationQueue withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {

@@ -59,7 +59,6 @@
 		E5E7A6D717C1F57A00803A0D = {
 			isa = PBXGroup;
 			children = (
-				E5E7A72A17C1FAEF00803A0D /* CoreMotion.framework */,
 				E5E7A6E917C1F57A00803A0D /* Demo */,
 				E5E7A70617C1F59E00803A0D /* MotionOrientation */,
 				E5E7A6E217C1F57A00803A0D /* Frameworks */,
@@ -81,6 +80,7 @@
 				E5E7A6E317C1F57A00803A0D /* UIKit.framework */,
 				E5E7A6E517C1F57A00803A0D /* Foundation.framework */,
 				E5E7A6E717C1F57A00803A0D /* CoreGraphics.framework */,
+				E5E7A72A17C1FAEF00803A0D /* CoreMotion.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

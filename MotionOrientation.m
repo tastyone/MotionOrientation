@@ -117,7 +117,7 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 	// Read my blog for more details on the angles. It should be obvious that you
 	// could fire a custom shouldAutorotateToInterfaceOrientation-event here.
     UIInterfaceOrientation newInterfaceOrientation = self.interfaceOrientation;
-    UIInterfaceOrientation newDeviceOrientation = self.deviceOrientation;
+    UIDeviceOrientation newDeviceOrientation = self.deviceOrientation;
     
 #ifdef DEBUG
     NSString* orientationString = nil;

@@ -19,6 +19,8 @@ extern NSString* const kMotionOrientationKey;
 @property (readonly) UIDeviceOrientation deviceOrientation;
 @property (readonly) CGAffineTransform affineTransform;
 
+@property (assign) BOOL showDebugLog;
+
 + (void)initialize;
 + (MotionOrientation *)sharedInstance;
 

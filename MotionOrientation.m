@@ -28,6 +28,8 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 @synthesize motionManager = _motionManager;
 @synthesize operationQueue = _operationQueue;
 
+@synthesize showDebugLog = _showDebugLog;
+
 + (void)initialize
 {
     [MotionOrientation sharedInstance];
@@ -45,6 +47,8 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 
 - (void)_initialize
 {
+    self.showDebugLog = NO;
+    
     self.operationQueue = [[NSOperationQueue alloc] init];
     
     self.motionManager = [[CMMotionManager alloc] init];
@@ -197,10 +201,12 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
                                                             object:nil 
                                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
 #ifdef DEBUG
-        NSLog(@"didAccelerate: absoluteZ: %f angle: %f (x: %f, y: %f, z: %f), orientationString: %@", 
-              absoluteZ, angle, 
-              acceleration.x, acceleration.y, acceleration.z, 
-              orientationString);
+        if ( self.showDebugLog ) {
+            NSLog(@"didAccelerate: absoluteZ: %f angle: %f (x: %f, y: %f, z: %f), orientationString: %@",
+                  absoluteZ, angle, 
+                  acceleration.x, acceleration.y, acceleration.z, 
+                  orientationString);
+        }
 #endif
     }
     if ( interfaceOrientationChanged ) {
@@ -237,7 +243,10 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
+#if __has_feature(objc_arc)
+#else
     [super dealloc];
+#endif
 }
 
 #endif

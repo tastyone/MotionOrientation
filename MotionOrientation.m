@@ -193,9 +193,11 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 
     // post notifications
     if ( deviceOrientationChanged ) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationChangedNotification 
-                                                            object:nil 
-                                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationChangedNotification
+                                                                object:nil
+                                                              userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
+        });
 #ifdef DEBUG
         NSLog(@"didAccelerate: absoluteZ: %f angle: %f (x: %f, y: %f, z: %f), orientationString: %@", 
               absoluteZ, angle, 
@@ -204,9 +206,11 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 #endif
     }
     if ( interfaceOrientationChanged ) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationInterfaceOrientationChangedNotification 
-                                                            object:nil 
-                                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationInterfaceOrientationChangedNotification
+                                                                object:nil
+                                                              userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
+        });
     }
 }
 

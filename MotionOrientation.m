@@ -54,7 +54,9 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.accelerometerUpdateInterval = 0.1;
     if ( ![self.motionManager isAccelerometerAvailable] ) {
-        NSLog(@"MotionOrientation - Accelerometer is NOT available");
+        if ( self.showDebugLog ) {
+            NSLog(@"MotionOrientation - Accelerometer is NOT available");
+        }
 #ifdef __i386__
         [self simulatorInit];
 #endif
@@ -98,14 +100,18 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
         default:
             break;
     }
-    NSLog(@"affineTransform degree: %d", rotationDegree);
+    if ( self.showDebugLog ) {
+        NSLog(@"affineTransform degree: %d", rotationDegree);
+    }
     return CGAffineTransformMakeRotation(MO_degreesToRadian(rotationDegree));
 }
 
 - (void)accelerometerUpdateWithData:(CMAccelerometerData *)accelerometerData error:(NSError *)error
 {
     if ( error ) {
-        NSLog(@"accelerometerUpdateERROR: %@", error);
+        if ( self.showDebugLog ) {
+            NSLog(@"accelerometerUpdateERROR: %@", error);
+        }
         return;
     }
     
@@ -200,14 +206,12 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
         [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationChangedNotification 
                                                             object:nil 
                                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
-#ifdef DEBUG
         if ( self.showDebugLog ) {
             NSLog(@"didAccelerate: absoluteZ: %f angle: %f (x: %f, y: %f, z: %f), orientationString: %@",
                   absoluteZ, angle, 
                   acceleration.x, acceleration.y, acceleration.z, 
                   orientationString);
         }
-#endif
     }
     if ( interfaceOrientationChanged ) {
         [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationInterfaceOrientationChangedNotification 

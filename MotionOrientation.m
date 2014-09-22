@@ -62,9 +62,6 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 #endif
         return;
     }
-    [self.motionManager startAccelerometerUpdatesToQueue:self.operationQueue withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
-        [self accelerometerUpdateWithData:accelerometerData error:error];
-    }];
 }
 
 - (id)init
@@ -104,6 +101,18 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
         NSLog(@"affineTransform degree: %d", rotationDegree);
     }
     return CGAffineTransformMakeRotation(MO_degreesToRadian(rotationDegree));
+}
+
+- (void)startAccelerometerUpdates
+{
+    [self.motionManager startAccelerometerUpdatesToQueue:self.operationQueue withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
+        [self accelerometerUpdateWithData:accelerometerData error:error];
+    }];
+}
+
+- (void)stopAccelerometerUpdates
+{
+    [self.motionManager stopAccelerometerUpdates];
 }
 
 - (void)accelerometerUpdateWithData:(CMAccelerometerData *)accelerometerData error:(NSError *)error

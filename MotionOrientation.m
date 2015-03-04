@@ -149,7 +149,7 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 #endif
         }
 	}
-    else if(angle >= -2.0 && angle <= -1.0) // (angle >= -2.25 && angle <= -0.75)
+    else if(angle >= -2.25 && angle <= -0.75) //(angle >= -2.0 && angle <= -1.0) // (angle >= -2.25 && angle <= -0.75)
 	{
         newInterfaceOrientation = UIInterfaceOrientationPortrait;
         newDeviceOrientation = UIDeviceOrientationPortrait;

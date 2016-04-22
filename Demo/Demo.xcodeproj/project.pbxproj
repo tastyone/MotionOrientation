@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2CA760291CCA00F900B538F0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CA760281CCA00F900B538F0 /* ViewController.m */; };
 		E5E7A6E417C1F57A00803A0D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E317C1F57A00803A0D /* UIKit.framework */; };
 		E5E7A6E617C1F57A00803A0D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E517C1F57A00803A0D /* Foundation.framework */; };
 		E5E7A6E817C1F57A00803A0D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E717C1F57A00803A0D /* CoreGraphics.framework */; };
@@ -22,6 +23,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2CA760271CCA00F900B538F0 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		2CA760281CCA00F900B538F0 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		E5E7A6E017C1F57A00803A0D /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5E7A6E317C1F57A00803A0D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		E5E7A6E517C1F57A00803A0D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -90,6 +93,8 @@
 			children = (
 				E5E7A6F217C1F57A00803A0D /* AppDelegate.h */,
 				E5E7A6F317C1F57A00803A0D /* AppDelegate.m */,
+				2CA760271CCA00F900B538F0 /* ViewController.h */,
+				2CA760281CCA00F900B538F0 /* ViewController.m */,
 				E5E7A6FE17C1F57A00803A0D /* ViewController.xib */,
 				E5E7A6EA17C1F57A00803A0D /* Supporting Files */,
 			);
@@ -187,6 +192,7 @@
 			files = (
 				E5E7A6F017C1F57A00803A0D /* main.m in Sources */,
 				E5E7A6F417C1F57A00803A0D /* AppDelegate.m in Sources */,
+				2CA760291CCA00F900B538F0 /* ViewController.m in Sources */,
 				E5E7A72817C1F59E00803A0D /* MotionOrientation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -238,7 +244,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -262,7 +268,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -275,7 +281,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Demo/Demo-Prefix.pch";
 				INFOPLIST_FILE = "Demo/Demo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -287,7 +293,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Demo/Demo-Prefix.pch";
 				INFOPLIST_FILE = "Demo/Demo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -312,6 +318,7 @@
 				E5E7A70517C1F57A00803A0D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

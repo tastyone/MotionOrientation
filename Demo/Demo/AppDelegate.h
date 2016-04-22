@@ -15,9 +15,11 @@
 @property (strong, nonatomic) UIWindow * window;
 
 @property (strong, nonatomic) IBOutlet UIViewController * viewController;
-@property (unsafe_unretained, nonatomic) IBOutlet UILabel * label1;
-@property (unsafe_unretained, nonatomic) IBOutlet UILabel * label2;
-@property (unsafe_unretained, nonatomic) IBOutlet UILabel * label3;
-@property (unsafe_unretained, nonatomic) IBOutlet UILabel * label4;
+
+@property (unsafe_unretained, nonatomic) IBOutlet UILabel * labelDebugData;
+@property (unsafe_unretained, nonatomic) IBOutlet UILabel * labelMotionDeviceOrientation;
+@property (unsafe_unretained, nonatomic) IBOutlet UILabel * labelMotionInterfaceOrientation;
+@property (unsafe_unretained, nonatomic) IBOutlet UILabel * labelDeviceOrientation;
+@property (unsafe_unretained, nonatomic) IBOutlet UILabel * labelInterfaceOrientation;
 
 @end

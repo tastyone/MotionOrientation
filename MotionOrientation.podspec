@@ -23,7 +23,7 @@ Pod::Spec.new do |s|
   s.author       = { "Sangwon Park" => "" }
   
   s.platform     = :ios
-  s.source       = { :git => "https://github.com/tastyone/MotionOrientation.git", :commit => "f99e0aaf66cde5e977dc5218b920cde7154ce445" }
+  s.source       = { :git => "https://github.com/tastyone/MotionOrientation.git", :commit => "67ecd027dfd629380133806ad9ad98f50b40f0ba" }
   s.source_files  = 'MotionOrientation.{h,m}'
   s.preserve_paths = "README.md"
   s.frameworks = 'CoreMotion', 'CoreGraphics'

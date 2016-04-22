@@ -136,41 +136,6 @@ NSString *const kMotionOrientationDebugDataKey = @"kMotionOrientationDebugDataKe
     UIInterfaceOrientation newInterfaceOrientation = [self interfaceOrientationWithCurrentInterfaceOrientation:self.interfaceOrientation angle:angle z:z];
     UIDeviceOrientation newDeviceOrientation = [self deviceOrientationWithCurrentDeviceOrientation:self.deviceOrientation angle:angle z:z];
 
-//    if(absoluteZ > 0.8f)
-//    {
-//        if ( z > 0.0f ) {
-//            newDeviceOrientation = UIDeviceOrientationFaceDown;
-//        } else {
-//            newDeviceOrientation = UIDeviceOrientationFaceUp;
-//        }
-//	}
-//    else if(angle >= -2.25 && angle <= -0.75) //(angle >= -2.0 && angle <= -1.0) // (angle >= -2.25 && angle <= -0.75)
-//	{
-//        newInterfaceOrientation = UIInterfaceOrientationPortrait;
-//        newDeviceOrientation = UIDeviceOrientationPortrait;
-//        //self.captureVideoOrientation = AVCaptureVideoOrientationPortrait;
-//	}
-//	else if(angle >= -0.5 && angle <= 0.5) // (angle >= -0.75 && angle <= 0.75)
-//	{
-//        newInterfaceOrientation = UIInterfaceOrientationLandscapeLeft;
-//        newDeviceOrientation = UIDeviceOrientationLandscapeLeft;
-//        //self.captureVideoOrientation = AVCaptureVideoOrientationLandscapeRight;
-//	}
-//	else if(angle >= 1.0 && angle <= 2.0) // (angle >= 0.75 && angle <= 2.25)
-//	{
-//        newInterfaceOrientation = UIInterfaceOrientationPortraitUpsideDown;
-//        newDeviceOrientation = UIDeviceOrientationPortraitUpsideDown;
-//        //self.captureVideoOrientation = AVCaptureVideoOrientationPortraitUpsideDown;
-//	}
-//	else if(angle <= -2.5 || angle >= 2.5) // (angle <= -2.25 || angle >= 2.25)
-//	{
-//        newInterfaceOrientation = UIInterfaceOrientationLandscapeRight;
-//        newDeviceOrientation = UIDeviceOrientationLandscapeRight;
-//        //self.captureVideoOrientation = AVCaptureVideoOrientationLandscapeLeft;
-//	} else {
-//
-//    }
-
     BOOL deviceOrientationChanged = NO;
     BOOL interfaceOrientationChanged = NO;
 

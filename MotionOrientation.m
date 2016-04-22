@@ -82,7 +82,7 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
             rotationDegree = 0;
             break;
 
-        case UIInterfaceOrientationLandscapeLeft:
+        case UIInterfaceOrientationLandscapeRight:
             rotationDegree = 90;
             break;
 
@@ -90,7 +90,7 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
             rotationDegree = 180;
             break;
 
-        case UIInterfaceOrientationLandscapeRight:
+        case UIInterfaceOrientationLandscapeLeft:
             rotationDegree = 270;
             break;
 
@@ -176,7 +176,7 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 	}
 	else if(angle >= -0.5 && angle <= 0.5) // (angle >= -0.75 && angle <= 0.75)
 	{
-        newInterfaceOrientation = UIInterfaceOrientationLandscapeLeft;
+        newInterfaceOrientation = UIInterfaceOrientationLandscapeRight;
         newDeviceOrientation = UIDeviceOrientationLandscapeLeft;
         //self.captureVideoOrientation = AVCaptureVideoOrientationLandscapeRight;
 #ifdef DEBUG
@@ -194,7 +194,7 @@ NSString* const kMotionOrientationKey = @"kMotionOrientationKey";
 	}
 	else if(angle <= -2.5 || angle >= 2.5) // (angle <= -2.25 || angle >= 2.25)
 	{
-        newInterfaceOrientation = UIInterfaceOrientationLandscapeRight;
+        newInterfaceOrientation = UIInterfaceOrientationLandscapeLeft;
         newDeviceOrientation = UIDeviceOrientationLandscapeRight;
         //self.captureVideoOrientation = AVCaptureVideoOrientationLandscapeLeft;
 #ifdef DEBUG

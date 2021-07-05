@@ -12,7 +12,8 @@ let package = Package(
     targets: [
         .target(
             name: "MotionOrientation",
-            dependencies: []
+            dependencies: [],
+            publicHeadersPath: "."
         )
     ]
 )

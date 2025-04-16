@@ -12,7 +12,8 @@ let package = Package(
     targets: [
         .target(
             name: "MotionOrientation",
-            dependencies: [],
+            path: ".",
+            exclude: ["Demo", "README.md", "LICENSE", "MotionOrientation.podspec", ".gitignore", "Package.swift"],
             publicHeadersPath: "."
         )
     ]

@@ -133,7 +133,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
             rotationDegree = 0;
             break;
 
-        case UIInterfaceOrientationLandscapeLeft:
+        case UIInterfaceOrientationLandscapeRight:
             rotationDegree = 90;
             break;
 
@@ -141,7 +141,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
             rotationDegree = 180;
             break;
 
-        case UIInterfaceOrientationLandscapeRight:
+        case UIInterfaceOrientationLandscapeLeft:
             rotationDegree = 270;
             break;
 
@@ -336,8 +336,8 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
     switch (deviceOrientation) {
         case UIDeviceOrientationPortrait:           return UIInterfaceOrientationPortrait;
         case UIDeviceOrientationPortraitUpsideDown: return UIInterfaceOrientationPortraitUpsideDown;
-        case UIDeviceOrientationLandscapeLeft:      return UIInterfaceOrientationLandscapeLeft;
-        case UIDeviceOrientationLandscapeRight:     return UIInterfaceOrientationLandscapeRight;
+        case UIDeviceOrientationLandscapeLeft:      return UIInterfaceOrientationLandscapeRight;
+        case UIDeviceOrientationLandscapeRight:     return UIInterfaceOrientationLandscapeLeft;
         default:
             return UIInterfaceOrientationUnknown;
     }

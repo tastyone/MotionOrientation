@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		2C5C42242DAD16FE00CD4565 /* MotionOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C5C42212DAD16FE00CD4565 /* MotionOrientation.m */; };
+		2C5C42272DAFCDD400CD4565 /* lenna.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C5C42262DAFCDD400CD4565 /* lenna.png */; };
+		2C5C422A2DAFCF1600CD4565 /* FixedOverlayManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C5C42292DAFCF1400CD4565 /* FixedOverlayManager.m */; };
 		2CA760291CCA00F900B538F0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CA760281CCA00F900B538F0 /* ViewController.m */; };
 		E5E7A6E417C1F57A00803A0D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E317C1F57A00803A0D /* UIKit.framework */; };
 		E5E7A6E617C1F57A00803A0D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E517C1F57A00803A0D /* Foundation.framework */; };
@@ -25,6 +27,9 @@
 /* Begin PBXFileReference section */
 		2C5C42202DAD16FE00CD4565 /* MotionOrientation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MotionOrientation.h; sourceTree = "<group>"; };
 		2C5C42212DAD16FE00CD4565 /* MotionOrientation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MotionOrientation.m; sourceTree = "<group>"; };
+		2C5C42262DAFCDD400CD4565 /* lenna.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lenna.png; sourceTree = "<group>"; };
+		2C5C42282DAFCF1000CD4565 /* FixedOverlayManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FixedOverlayManager.h; sourceTree = "<group>"; };
+		2C5C42292DAFCF1400CD4565 /* FixedOverlayManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FixedOverlayManager.m; sourceTree = "<group>"; };
 		2CA760271CCA00F900B538F0 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		2CA760281CCA00F900B538F0 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		E5E7A6E017C1F57A00803A0D /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +114,8 @@
 		E5E7A6E917C1F57A00803A0D /* Demo */ = {
 			isa = PBXGroup;
 			children = (
+				2C5C42282DAFCF1000CD4565 /* FixedOverlayManager.h */,
+				2C5C42292DAFCF1400CD4565 /* FixedOverlayManager.m */,
 				E5E7A6F217C1F57A00803A0D /* AppDelegate.h */,
 				E5E7A6F317C1F57A00803A0D /* AppDelegate.m */,
 				2CA760271CCA00F900B538F0 /* ViewController.h */,
@@ -129,6 +136,7 @@
 				E5E7A6F517C1F57A00803A0D /* Default.png */,
 				E5E7A6F717C1F57A00803A0D /* Default@2x.png */,
 				E5E7A6F917C1F57A00803A0D /* Default-568h@2x.png */,
+				2C5C42262DAFCDD400CD4565 /* lenna.png */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -191,6 +199,7 @@
 			files = (
 				E5E7A6EE17C1F57A00803A0D /* InfoPlist.strings in Resources */,
 				E5E7A6F617C1F57A00803A0D /* Default.png in Resources */,
+				2C5C42272DAFCDD400CD4565 /* lenna.png in Resources */,
 				E5E7A6F817C1F57A00803A0D /* Default@2x.png in Resources */,
 				E5E7A6FA17C1F57A00803A0D /* Default-568h@2x.png in Resources */,
 				E5E7A70017C1F57A00803A0D /* ViewController.xib in Resources */,
@@ -206,6 +215,7 @@
 			files = (
 				2C5C42242DAD16FE00CD4565 /* MotionOrientation.m in Sources */,
 				E5E7A6F017C1F57A00803A0D /* main.m in Sources */,
+				2C5C422A2DAFCF1600CD4565 /* FixedOverlayManager.m in Sources */,
 				E5E7A6F417C1F57A00803A0D /* AppDelegate.m in Sources */,
 				2CA760291CCA00F900B538F0 /* ViewController.m in Sources */,
 			);

@@ -8,10 +8,12 @@
 
 #import "ViewController.h"
 #import "MotionOrientation.h"
+#import "FixedOverlayManager.h"
 
 @interface ViewController ()
 
 @property NSString* debugDataString;
+@property UIImageView* imageView;
 
 @end
 
@@ -43,12 +45,20 @@
         self.labelDeviceOrientation.font = [UIFont monospacedSystemFontOfSize:fontSize weight:UIFontWeightRegular];
         self.labelInterfaceOrientation.font = [UIFont monospacedSystemFontOfSize:fontSize weight:UIFontWeightRegular];
     }
+
+    [[FixedOverlayManager sharedManager] showOverlay];
+
+    // add an image
+    _imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"lenna"]];
+    _imageView.frame = CGRectMake(0, 0, 44, 44);
+    _imageView.center = CGPointMake(150, 44);
+    [[FixedOverlayManager sharedManager].overlayView addSubview:_imageView];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
+
     [[MotionOrientation sharedInstance] start];
 }
 
@@ -148,6 +158,9 @@
         UIInterfaceOrientation interfaceOrientation = [MotionOrientation sharedInstance].interfaceOrientation;
         self.labelMotionInterfaceOrientation.text = [NSString stringWithFormat:@"%@ %@", [notification.userInfo valueForKey:kMotionOrientationDebugDataKey], [self stringDescriptionForInterfaceOrientation:interfaceOrientation]];
         self.labelMotionInterfaceOrientation.backgroundColor = [self backgroundColorForInterfaceOrientation:interfaceOrientation];
+
+        CGAffineTransform affineTransform = [MotionOrientation sharedInstance].affineTransform;
+        self.imageView.transform = affineTransform;
     });
 }
 

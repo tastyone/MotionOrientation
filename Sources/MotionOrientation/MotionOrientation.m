@@ -20,31 +20,41 @@
 
 #define MO_degreesToRadian(x) (M_PI * (x) / 180.0)
 
+/// Accelerometer update interval in seconds. in normal mode
+#define MO_ACCELEROMETER_UPDATE_INTERVAL_NORMAL_MODE 0.15
+/// Accelerometer update interval in seconds. in low energe mode
+#define MO_ACCELEROMETER_UPDATE_INTERVAL_LOW_ENERGE_MODE 0.5
+
+/// The delay to determine the orientation is changed
+#define MO_CANDIDATE_UPDATE_DELAY_IN_SECONDS 0.19
+
 NSString *const MotionOrientationChangedNotification = @"MotionOrientationChangedNotification";
 NSString *const MotionOrientationInterfaceOrientationChangedNotification = @"MotionOrientationInterfaceOrientationChangedNotification";
 NSString *const MotionOrientationAccelerometerUpdatedNotification = @"MotionOrientationAccelerometerUpdatedNotification";
 
-NSString *const kMotionOrientationKey = @"kMotionOrientationKey";
-NSString *const kMotionOrientationDebugDataKey = @"kMotionOrientationDebugDataKey";
+NSString *const kMotionOrientationKey = @"MotionOrientationKey";
+NSString *const kMotionOrientationDeviceOrientationKey = @"MotionOrientationDeviceOrientationKey";
+NSString *const kMotionOrientationInterfaceOrientationKey = @"MotionOrientationInterfaceOrientationKey";
+
+NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey";
+
+// MARK: - Interface
 
 @interface MotionOrientation ()
-@property (strong) CMMotionManager* motionManager;
-@property (strong) NSOperationQueue* operationQueue;
+
+@property (nonatomic, strong, nonnull) CMMotionManager* motionManager;
+@property (nonatomic, strong, nonnull) NSOperationQueue* operationQueue;
+@property (nonatomic, assign) UIDeviceOrientation candidateOrientation;
+@property (nonatomic, assign) NSTimeInterval accelerometerUpdateInterval;
+@property (nonatomic, assign) int candidateNominationCount;
+@property (nonatomic, assign) bool useLowEnergeModeForcely;
+@property (nonatomic, assign) bool isEnabled;
+
 @end
 
+// MARK: - Implementation
 
 @implementation MotionOrientation
-
-@synthesize interfaceOrientation = _interfaceOrientation;
-@synthesize deviceOrientation = _deviceOrientation;
-
-@synthesize motionManager = _motionManager;
-@synthesize operationQueue = _operationQueue;
-
-+ (void)initialize
-{
-    [[MotionOrientation sharedInstance] startAccelerometerUpdates];
-}
 
 + (MotionOrientation *)sharedInstance
 {
@@ -56,25 +66,59 @@ NSString *const kMotionOrientationDebugDataKey = @"kMotionOrientationDebugDataKe
     return sharedInstance;
 }
 
+- (void)start
+{
+    [self setEnabled:true];
+}
+
+- (void)stop
+{
+    [self setEnabled:false];
+}
+
 - (void)_initialize
 {
-    self.operationQueue = [[NSOperationQueue alloc] init];
+    _accelerometerUpdateInterval = MO_ACCELEROMETER_UPDATE_INTERVAL_NORMAL_MODE;
+    _useLowEnergeModeForcely = false;
+    _isEnabled = true;
 
-    self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.accelerometerUpdateInterval = 0.1;
-    if ( ![self.motionManager isAccelerometerAvailable] ) {
+    _candidateOrientation = UIDeviceOrientationUnknown;
+    _deviceOrientation = UIDeviceOrientationPortrait;
+    _interfaceOrientation = UIInterfaceOrientationPortrait;
+
+    _operationQueue = [[NSOperationQueue alloc] init];
+    _operationQueue.qualityOfService = NSQualityOfServiceUtility;
+
+    _motionManager = [[CMMotionManager alloc] init];
+    _motionManager.accelerometerUpdateInterval = _accelerometerUpdateInterval;
+    if ( ![_motionManager isAccelerometerAvailable] ) {
         NSLog(@"MotionOrientation - Accelerometer is NOT available");
-#ifdef __i386__
+#if TARGET_OS_SIMULATOR
         [self simulatorInit];
 #endif
         return;
     }
+
+    [self updateLowEnergeMode];
+
+    /// add observer to monitor power state changed
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(powerStateChanged:) name:NSProcessInfoPowerStateDidChangeNotification object:nil];
+
+    /// add observer to monitor thermal state changed
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thermalStateChanged:) name:NSProcessInfoThermalStateDidChangeNotification object:nil];
+
+    /// add observer to enter background
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+
+    /// add observer to become active
+    /// The reason not using UIApplicationWillEnterForegroundNotification is that starting sensors are better to start in active state
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 
 - (id)init
 {
     self = [super init];
-    if ( self ) {
+    if (self) {
         [self _initialize];
     }
     return self;
@@ -84,7 +128,7 @@ NSString *const kMotionOrientationDebugDataKey = @"kMotionOrientationDebugDataKe
 {
     int rotationDegree = 0;
 
-    switch (self.interfaceOrientation) {
+    switch (_interfaceOrientation) {
         case UIInterfaceOrientationPortrait:
             rotationDegree = 0;
             break;
@@ -109,217 +153,304 @@ NSString *const kMotionOrientationDebugDataKey = @"kMotionOrientationDebugDataKe
 
 - (void)startAccelerometerUpdates
 {
-    if (![self.motionManager isAccelerometerAvailable]) {
+#if DEBUG
+    NSLog(@"MotionOrientation - startAccelerometerUpdates");
+#endif
+    if(!_isEnabled) {
+#if DEBUG
+        NSLog(@"MotionOrientation - is NOT Enabled!");
+#endif
+        return;
+    }
+
+    if (![_motionManager isAccelerometerAvailable]) {
         NSLog(@"MotionOrientation - Accelerometer is NOT available");
         return;
     }
 
-    [self.motionManager startAccelerometerUpdatesToQueue:self.operationQueue withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
-        [self accelerometerUpdateWithData:accelerometerData error:error];
+    if ([_motionManager isAccelerometerActive]) { // check already started
+        NSLog(@"MotionOrientation - Accelerometer is ALREADY Active");
+        return;
+    }
+    
+    [_motionManager startAccelerometerUpdatesToQueue:_operationQueue withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
+        [self didAccelerometerUpdateWithData:accelerometerData error:error];
     }];
 }
 
 - (void)stopAccelerometerUpdates
 {
-    [self.motionManager stopAccelerometerUpdates];
+#if DEBUG
+    NSLog(@"MotionOrientation - stopAccelerometerUpdates");
+#endif
+    if ([_motionManager isAccelerometerActive]) {
+        [_motionManager stopAccelerometerUpdates];
+    }
 }
 
-- (void)accelerometerUpdateWithData:(CMAccelerometerData *)accelerometerData error:(NSError *)error
+- (void)setLowEnergeModeForcely:(bool)isOn {
+    _useLowEnergeModeForcely = isOn;
+    [self updateLowEnergeMode];
+}
+
+- (void)setEnabled:(bool)isEnabled {
+    _isEnabled = isEnabled;
+    if (_isEnabled) {
+        [self startAccelerometerUpdates];
+    } else {
+        [self stopAccelerometerUpdates];
+    }
+}
+
+// MARK: - energe and app cycle
+
+- (void)setLowEnergeMode:(bool)isOn
 {
-    if ( error ) {
-        NSLog(@"accelerometerUpdateERROR: %@", error);
+    if (isOn) {
+        _accelerometerUpdateInterval = MO_ACCELEROMETER_UPDATE_INTERVAL_LOW_ENERGE_MODE;
+        NSLog(@"MotionOrientation - LowEnergeMode: ON");
+    } else {
+        _accelerometerUpdateInterval = MO_ACCELEROMETER_UPDATE_INTERVAL_NORMAL_MODE;
+        NSLog(@"MotionOrientation - LowEnergeMode: OFF");
+    }
+
+    _motionManager.accelerometerUpdateInterval = _accelerometerUpdateInterval;
+}
+
+- (void)updateLowEnergeMode {
+    bool isLowPowerModeEnabled = [NSProcessInfo processInfo].isLowPowerModeEnabled; // no performance issue will be incurred. just accesing the property in RAM.
+    bool thermalState = [NSProcessInfo processInfo].thermalState; // no performance issue will be occured. just accesing the property in RAM.
+    bool isNotCool = !(thermalState == NSProcessInfoThermalStateNominal || thermalState == NSProcessInfoThermalStateFair);
+    bool isLowEnerge = isLowPowerModeEnabled || isNotCool || _useLowEnergeModeForcely;
+#if DEBUG
+    NSLog(@"MotionOrientation - updateLowEnergeMode: (%d, %@(%d)) + %d -> %d",
+          isLowPowerModeEnabled, [self stringDescriptionForThermalState:thermalState], isNotCool, _useLowEnergeModeForcely, isLowEnerge);
+#endif
+    [self setLowEnergeMode:isLowEnerge];
+}
+
+- (void)powerStateChanged:(NSNotification *)notification {
+    [self updateLowEnergeMode];
+}
+
+- (void)thermalStateChanged:(NSNotification *)notification {
+    [self updateLowEnergeMode];
+}
+
+- (void)appDidEnterBackground
+{
+    [self stopAccelerometerUpdates];
+}
+
+- (void)appDidBecomeActive
+{
+    [self startAccelerometerUpdates];
+}
+
+// MARK: - orientation estimation
+
+- (void)didAccelerometerUpdateWithData:(CMAccelerometerData *)accelerometerData error:(NSError *)error
+{
+    if (error) {
+        NSLog(@"MotionOrientation - accelerometerUpdateWithData.ERROR: %@", error);
+        return;
+    }
+    if (!accelerometerData) {
+        NSLog(@"MotionOrientation - accelerometerUpdateWithData: No data");
         return;
     }
 
     CMAcceleration acceleration = accelerometerData.acceleration;
+    UIDeviceOrientation estimatedOrientation = [self estimateOrientationFrom:acceleration];
 
-    // Get the current device angle
-	float xx = -acceleration.x;
-	float yy = acceleration.y;
-    float z = acceleration.z;
-	float angle = atan2(yy, xx);
+#if DEBUG
+    NSString* debugData = [self stringDescriptionForAcceleration:acceleration];
+#else
+    NSString* debugData = nil;
+#endif
 
-	// Add 1.5 to the angle to keep the label constantly horizontal to the viewer.
-    //	[interfaceOrientationLabel setTransform:CGAffineTransformMakeRotation(angle+1.5)];
-
-	// Read my blog for more details on the angles. It should be obvious that you
-	// could fire a custom shouldAutorotateToInterfaceOrientation-event here.
-    UIInterfaceOrientation newInterfaceOrientation = [self interfaceOrientationWithCurrentInterfaceOrientation:self.interfaceOrientation angle:angle z:z];
-    UIDeviceOrientation newDeviceOrientation = [self deviceOrientationWithCurrentDeviceOrientation:self.deviceOrientation angle:angle z:z];
-
-    BOOL deviceOrientationChanged = NO;
-    BOOL interfaceOrientationChanged = NO;
-
-    if ( newDeviceOrientation != self.deviceOrientation ) {
-        deviceOrientationChanged = YES;
-        _deviceOrientation = newDeviceOrientation;
+    if (estimatedOrientation != UIDeviceOrientationUnknown) {
+        if (estimatedOrientation == _deviceOrientation) {
+            _candidateOrientation = UIDeviceOrientationUnknown;
+            _candidateNominationCount = 0;
+        } else if (estimatedOrientation != _candidateOrientation) {
+            _candidateOrientation = estimatedOrientation;
+            _candidateNominationCount = 0;
+        } else {
+            _candidateNominationCount += 1;
+            float candidateDelayInSeconds = _accelerometerUpdateInterval * (float)_candidateNominationCount;
+            if (candidateDelayInSeconds > MO_CANDIDATE_UPDATE_DELAY_IN_SECONDS) {
+                [self updateAndPostNewDeviceOrientation:estimatedOrientation withDebugData:debugData];
+//                [self updateLowEnergeMode]; // check and update low energe mode, in case the app became foreground from background
+            }
+        }
     }
 
-    if ( newInterfaceOrientation != self.interfaceOrientation ) {
-        interfaceOrientationChanged = YES;
-        _interfaceOrientation = newInterfaceOrientation;
-    }
-
-    // post notifications
-    if ( deviceOrientationChanged ) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationChangedNotification
-                                                            object:nil
-                                                          userInfo:@{
-                                                                     kMotionOrientationKey: self,
-                                                                     kMotionOrientationDebugDataKey: [self debugDataStringWithZ:z withAngle:angle]
-                                                                     }];
-//        NSLog(@"didAccelerate: absoluteZ: %f angle: %f (x: %f, y: %f, z: %f), orientationString: %@",
-//              absoluteZ, angle,
-//              acceleration.x, acceleration.y, acceleration.z,
-//              orientationString);
-    }
-    if ( interfaceOrientationChanged ) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationInterfaceOrientationChangedNotification
-                                                            object:nil
-                                                          userInfo:@{
-                                                                     kMotionOrientationKey: self,
-                                                                     kMotionOrientationDebugDataKey: [self debugDataStringWithZ:z withAngle:angle]
-                                                                     }];
-    }
-    
 #ifdef DEBUG
-    [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationAccelerometerUpdatedNotification
-                                                        object:nil
-                                                      userInfo:@{
-                                                                 kMotionOrientationKey: self,
-                                                                 kMotionOrientationDebugDataKey: [self debugDataStringWithZ:z withAngle:angle]
-                                                                 }];
+    float candidateDelayInSeconds = _accelerometerUpdateInterval * (float)_candidateNominationCount;
+    NSLog(@"Motionorientation - estimated orientation: %@ -> %@ (candidate: %@, %d, %.2f)",
+          debugData, [self stringDescriptionForDeviceOrientation: estimatedOrientation],
+          [self stringDescriptionForDeviceOrientation:_candidateOrientation], _candidateNominationCount, candidateDelayInSeconds
+          );
+
+    // post a notification [DEBUG]
+    [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationAccelerometerUpdatedNotification object:nil userInfo:@{
+        kMotionOrientationKey: self,
+        kMotionOrientationDeviceOrientationKey: [NSNumber numberWithInteger:estimatedOrientation],
+        kMotionOrientationDebugDataKey: debugData,
+    }];
 #endif
 }
 
-- (UIDeviceOrientation)deviceOrientationForInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
+/// Update with new device orientation and post notifications. Should be called when the device orientation is changed
+- (void)updateAndPostNewDeviceOrientation:(UIDeviceOrientation)newDeviceOrientation withDebugData:(NSString*)debugData {
+    _deviceOrientation = newDeviceOrientation;
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationChangedNotification object:nil userInfo:@{
+        kMotionOrientationKey: self,
+        kMotionOrientationDeviceOrientationKey: [NSNumber numberWithInteger:_deviceOrientation],
+#if DEBUG
+        kMotionOrientationDebugDataKey: debugData,
+#endif
+    }];
+
+    // get new interfaceOrientation
+    UIInterfaceOrientation newInterfaceOrientation = [self interfaceOrientationForDeviceOrientation:newDeviceOrientation];
+    if (newInterfaceOrientation == UIInterfaceOrientationUnknown) return;
+    if (newInterfaceOrientation == _interfaceOrientation) return;
+
+    _interfaceOrientation = newInterfaceOrientation;
+
+    // post a interface orientation changed notification
+    [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationInterfaceOrientationChangedNotification object:nil userInfo:@{
+        kMotionOrientationKey: self,
+        kMotionOrientationInterfaceOrientationKey: [NSNumber numberWithInteger:_interfaceOrientation],
+#if DEBUG
+        kMotionOrientationDebugDataKey: debugData,
+#endif
+    }];
+}
+
+- (UIInterfaceOrientation)interfaceOrientationForDeviceOrientation:(UIDeviceOrientation)deviceOrientation
 {
-    switch (interfaceOrientation) {
-        case UIInterfaceOrientationLandscapeLeft:
-            return UIDeviceOrientationLandscapeLeft;
-            
-        case UIInterfaceOrientationLandscapeRight:
-            return UIDeviceOrientationLandscapeRight;
-            
-        case UIInterfaceOrientationPortraitUpsideDown:
-            return UIDeviceOrientationPortraitUpsideDown;
-            
-        case UIInterfaceOrientationPortrait:
+    switch (deviceOrientation) {
+        case UIDeviceOrientationPortrait:           return UIInterfaceOrientationPortrait;
+        case UIDeviceOrientationPortraitUpsideDown: return UIInterfaceOrientationPortraitUpsideDown;
+        case UIDeviceOrientationLandscapeLeft:      return UIInterfaceOrientationLandscapeLeft;
+        case UIDeviceOrientationLandscapeRight:     return UIInterfaceOrientationLandscapeRight;
         default:
-            return UIDeviceOrientationPortrait;
+            return UIInterfaceOrientationUnknown;
     }
 }
 
-- (UIInterfaceOrientation)interfaceOrientationWithCurrentInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation angle:(float)angle z:(float)z;
+#if DEBUG
+- (NSString *)stringDescriptionForDeviceOrientation:(UIDeviceOrientation)orientation
 {
-    switch ([self deviceOrientationWithCurrentDeviceOrientation:[self deviceOrientationForInterfaceOrientation:interfaceOrientation] angle:angle z:z]) {
+    switch (orientation)
+    {
         case UIDeviceOrientationPortrait:
-            return UIInterfaceOrientationPortrait;
-            
-        case UIDeviceOrientationLandscapeLeft:
-            return UIInterfaceOrientationLandscapeLeft;
-            
-        case UIDeviceOrientationLandscapeRight:
-            return UIInterfaceOrientationLandscapeRight;
-            
+            return @"Portrait";
         case UIDeviceOrientationPortraitUpsideDown:
-            return UIInterfaceOrientationPortraitUpsideDown;
-            
+            return @"PortraitUpsideDown";
+        case UIDeviceOrientationLandscapeLeft:
+            return @"LandscapeLeft";
+        case UIDeviceOrientationLandscapeRight:
+            return @"LandscapeRight";
+        case UIDeviceOrientationFaceUp:
+            return @"FaceUp";
+        case UIDeviceOrientationFaceDown:
+            return @"FaceDown";
+        case UIDeviceOrientationUnknown:
         default:
-            return interfaceOrientation;
-            break;
+            return @"Unknown";
     }
 }
 
-- (UIDeviceOrientation)deviceOrientationWithCurrentDeviceOrientation:(UIDeviceOrientation)deviceOrientation angle:(float)angle z:(float)z;
+- (NSString *)stringDescriptionForThermalState:(NSProcessInfoThermalState)thermalState
 {
-    float absoluteZ = (float)fabs(z);
-    
-    if (deviceOrientation == UIDeviceOrientationFaceUp || deviceOrientation == UIDeviceOrientationFaceDown) {
-        if (absoluteZ < 0.845f) {
-            if (angle < -2.6f) {
-                deviceOrientation = UIDeviceOrientationLandscapeRight;
-            } else if (angle > -2.05f && angle < -1.1f) {
-                deviceOrientation = UIDeviceOrientationPortrait;
-            } else if (angle > -0.48f && angle < 0.48f) {
-                deviceOrientation = UIDeviceOrientationLandscapeLeft;
-            } else if (angle > 1.08f && angle < 2.08f) {
-                deviceOrientation = UIDeviceOrientationPortraitUpsideDown;
-            }
-        } else if (z < 0.f) {
-            deviceOrientation = UIDeviceOrientationFaceUp;
-        } else if (z > 0.f) {
-            deviceOrientation = UIDeviceOrientationFaceDown;
-        }
-    } else {
-        if (z > 0.875f) {
-            deviceOrientation = UIDeviceOrientationFaceDown;
-        } else if (z < -0.875f) {
-            deviceOrientation = UIDeviceOrientationFaceUp;
-        } else {
-            switch (deviceOrientation) {
-                case UIDeviceOrientationLandscapeLeft:
-                    if (angle < -1.07f) return UIDeviceOrientationPortrait;
-                    if (angle > 1.08f) return UIDeviceOrientationPortraitUpsideDown;
-                    break;
-                    
-                case UIDeviceOrientationLandscapeRight:
-                    if (angle < 0.f && angle > -2.05f) return UIDeviceOrientationPortrait;
-                    if (angle > 0.f && angle < 2.05f) return UIDeviceOrientationPortraitUpsideDown;
-                    break;
-                    
-                case UIDeviceOrientationPortraitUpsideDown:
-                    if (angle > 2.66f) return UIDeviceOrientationLandscapeRight;
-                    if (angle < 0.48f) return UIDeviceOrientationLandscapeLeft;
-                    break;
-                    
-                case UIDeviceOrientationPortrait:
-                default:
-                    if (angle > -0.47f) return UIDeviceOrientationLandscapeLeft;
-                    if (angle < -2.64f) return UIDeviceOrientationLandscapeRight;
-                    break;
-            }
-        }
+    switch (thermalState)
+    {
+        case NSProcessInfoThermalStateNominal:  return @"Nominal";
+        case NSProcessInfoThermalStateFair:     return @"Fair";
+        case NSProcessInfoThermalStateSerious:  return @"Serious";
+        case NSProcessInfoThermalStateCritical: return @"Critical";
+        default:
+            return @"Unknown";
     }
-    return deviceOrientation;
 }
+#endif
 
-- (NSString *)debugDataStringWithZ:(CGFloat)z withAngle:(CGFloat)angle
+#define MO_DYNAMIC_THRESHOLD_X_MIN 0.55
+#define MO_DYNAMIC_THRESHOLD_X_GAP 0.4
+#define MO_DYNAMIC_THRESHOLD_Y_MIN 0.5
+#define MO_DYNAMIC_THRESHOLD_Y_GAP 0.42
+#define MO_DYNAMIC_THRESHOLD_Z_MID 0.86
+#define MO_DYNAMIC_THRESHOLD_Z_HGAP 0.015
+
+#if DEBUG
+- (NSString *)stringDescriptionForAcceleration:(CMAcceleration)accel
 {
-    return [NSString stringWithFormat:@"<z: %.3f> <angle: %.3f>", z, angle];
+    double x = accel.x;
+    double y = accel.y;
+    double z = accel.z;
+    double xyMag = sqrt(x * x + y * y);
+    double zFactor = 1.0 - MIN(fabs(z), 1.0);
+    double dynamicThresholdX = MO_DYNAMIC_THRESHOLD_X_MIN + MO_DYNAMIC_THRESHOLD_X_GAP * zFactor;
+    double dynamicThresholdY = MO_DYNAMIC_THRESHOLD_Y_MIN + MO_DYNAMIC_THRESHOLD_Y_GAP * zFactor;
+    double dymanicThresholdZ = MO_DYNAMIC_THRESHOLD_Z_MID + MO_DYNAMIC_THRESHOLD_Z_HGAP * (fabs(x) - fabs(y));
+    return [NSString stringWithFormat:@"%.2f, %.2f, %.2f (%.2f / %.2f, %.2f, %.2f)", fabs(x), fabs(y), fabs(z), xyMag, dynamicThresholdX, dynamicThresholdY, dymanicThresholdZ];
+}
+#endif
+
+- (UIDeviceOrientation)estimateOrientationFrom:(CMAcceleration)accel
+{
+    double x = accel.x;
+    double y = accel.y;
+    double z = accel.z;
+
+    double dymanicThresholdZ = MO_DYNAMIC_THRESHOLD_Z_MID + MO_DYNAMIC_THRESHOLD_Z_HGAP * (fabs(x) - fabs(y));
+    if (fabs(z) > dymanicThresholdZ) {
+        return (z < 0) ? UIDeviceOrientationFaceUp : UIDeviceOrientationFaceDown;
+    }
+
+    /// Size of gravity projection in the xy plane
+    double xyMag = sqrt(x * x + y * y);
+
+    if (xyMag < 0.45) {
+        /// Too lying down → Pending orientation determination
+        return UIDeviceOrientationUnknown;
+    }
+
+    double zFactor = 1.0 - MIN(fabs(z), 1.0); // Larger z is closer to zero
+
+    double dynamicThresholdY = MO_DYNAMIC_THRESHOLD_Y_MIN + MO_DYNAMIC_THRESHOLD_Y_GAP * zFactor;
+    if (fabs(y) > dynamicThresholdY && fabs(y) > fabs(x)) {
+        return (y < 0) ? UIDeviceOrientationPortrait : UIDeviceOrientationPortraitUpsideDown;
+    }
+
+    double dynamicThresholdX = MO_DYNAMIC_THRESHOLD_X_MIN + MO_DYNAMIC_THRESHOLD_X_GAP * zFactor;
+    if (fabs(x) > dynamicThresholdX && fabs(x) > fabs(y)) {
+        return (x < 0) ? UIDeviceOrientationLandscapeLeft : UIDeviceOrientationLandscapeRight;
+    }
+
+    return UIDeviceOrientationUnknown;
 }
 
-// Simulator support
-#ifdef __i386__
+/// Simulator
+#if TARGET_OS_SIMULATOR
 
 - (void)simulatorInit
 {
     // Simulator
     NSLog(@"MotionOrientation - Simulator in use. Using UIDevice instead");
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(deviceOrientationChanged:)
-                                                 name:UIDeviceOrientationDidChangeNotification
-                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)deviceOrientationChanged:(NSNotification *)notification
 {
-    _deviceOrientation = [UIDevice currentDevice].orientation;
-    [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationChangedNotification
-                                                        object:nil
-                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, kMotionOrientationKey, nil]];
-}
-
-- (void)dealloc
-{
-    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-#if __has_feature(objc_arc)
-#else
-    [super dealloc];
-#endif
+    UIDeviceOrientation newDeviceOrientation = [UIDevice currentDevice].orientation;
+    [self updateAndPostNewDeviceOrientation:newDeviceOrientation withDebugData:@"<Simulator Mode>"];
 }
 
 #endif

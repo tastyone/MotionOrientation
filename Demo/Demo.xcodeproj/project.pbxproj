@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C5C42242DAD16FE00CD4565 /* MotionOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C5C42212DAD16FE00CD4565 /* MotionOrientation.m */; };
 		2CA760291CCA00F900B538F0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CA760281CCA00F900B538F0 /* ViewController.m */; };
 		E5E7A6E417C1F57A00803A0D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E317C1F57A00803A0D /* UIKit.framework */; };
 		E5E7A6E617C1F57A00803A0D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A6E517C1F57A00803A0D /* Foundation.framework */; };
@@ -18,11 +19,12 @@
 		E5E7A6F817C1F57A00803A0D /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E5E7A6F717C1F57A00803A0D /* Default@2x.png */; };
 		E5E7A6FA17C1F57A00803A0D /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E5E7A6F917C1F57A00803A0D /* Default-568h@2x.png */; };
 		E5E7A70017C1F57A00803A0D /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E5E7A6FE17C1F57A00803A0D /* ViewController.xib */; };
-		E5E7A72817C1F59E00803A0D /* MotionOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = E5E7A71C17C1F59E00803A0D /* MotionOrientation.m */; };
 		E5E7A72B17C1FAEF00803A0D /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5E7A72A17C1FAEF00803A0D /* CoreMotion.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2C5C42202DAD16FE00CD4565 /* MotionOrientation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MotionOrientation.h; sourceTree = "<group>"; };
+		2C5C42212DAD16FE00CD4565 /* MotionOrientation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MotionOrientation.m; sourceTree = "<group>"; };
 		2CA760271CCA00F900B538F0 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		2CA760281CCA00F900B538F0 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		E5E7A6E017C1F57A00803A0D /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -39,8 +41,6 @@
 		E5E7A6F717C1F57A00803A0D /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		E5E7A6F917C1F57A00803A0D /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		E5E7A6FF17C1F57A00803A0D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController.xib; sourceTree = "<group>"; };
-		E5E7A71B17C1F59E00803A0D /* MotionOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MotionOrientation.h; sourceTree = "<group>"; };
-		E5E7A71C17C1F59E00803A0D /* MotionOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MotionOrientation.m; sourceTree = "<group>"; };
 		E5E7A72A17C1FAEF00803A0D /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -59,11 +59,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2C5C42222DAD16FE00CD4565 /* MotionOrientation */ = {
+			isa = PBXGroup;
+			children = (
+				2C5C42202DAD16FE00CD4565 /* MotionOrientation.h */,
+				2C5C42212DAD16FE00CD4565 /* MotionOrientation.m */,
+			);
+			path = MotionOrientation;
+			sourceTree = "<group>";
+		};
+		2C5C42232DAD16FE00CD4565 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2C5C42222DAD16FE00CD4565 /* MotionOrientation */,
+			);
+			name = Sources;
+			path = ../Sources;
+			sourceTree = SOURCE_ROOT;
+		};
 		E5E7A6D717C1F57A00803A0D = {
 			isa = PBXGroup;
 			children = (
+				2C5C42232DAD16FE00CD4565 /* Sources */,
 				E5E7A6E917C1F57A00803A0D /* Demo */,
-				E5E7A70617C1F59E00803A0D /* MotionOrientation */,
 				E5E7A6E217C1F57A00803A0D /* Frameworks */,
 				E5E7A6E117C1F57A00803A0D /* Products */,
 			);
@@ -115,16 +133,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		E5E7A70617C1F59E00803A0D /* MotionOrientation */ = {
-			isa = PBXGroup;
-			children = (
-				E5E7A71B17C1F59E00803A0D /* MotionOrientation.h */,
-				E5E7A71C17C1F59E00803A0D /* MotionOrientation.m */,
-			);
-			name = MotionOrientation;
-			path = ..;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -152,12 +160,18 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0460;
+				TargetAttributes = {
+					E5E7A6DF17C1F57A00803A0D = {
+						DevelopmentTeam = S9DLPPENQG;
+					};
+				};
 			};
 			buildConfigurationList = E5E7A6DB17C1F57A00803A0D /* Build configuration list for PBXProject "Demo" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = E5E7A6D717C1F57A00803A0D;
@@ -190,10 +204,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C5C42242DAD16FE00CD4565 /* MotionOrientation.m in Sources */,
 				E5E7A6F017C1F57A00803A0D /* main.m in Sources */,
 				E5E7A6F417C1F57A00803A0D /* AppDelegate.m in Sources */,
 				2CA760291CCA00F900B538F0 /* ViewController.m in Sources */,
-				E5E7A72817C1F59E00803A0D /* MotionOrientation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,10 +292,12 @@
 		E5E7A70417C1F57A00803A0D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEVELOPMENT_TEAM = S9DLPPENQG;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Demo/Demo-Prefix.pch";
 				INFOPLIST_FILE = "Demo/Demo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.motionorientation.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -290,10 +306,12 @@
 		E5E7A70517C1F57A00803A0D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEVELOPMENT_TEAM = S9DLPPENQG;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Demo/Demo-Prefix.pch";
 				INFOPLIST_FILE = "Demo/Demo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.motionorientation.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

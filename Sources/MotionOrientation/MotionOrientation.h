@@ -68,4 +68,7 @@ extern NSString *const kMotionOrientationDebugDataKey;
 /// forcely enable and start / stop and disable. the initial default value is true
 - (void)setEnabled:(bool)isEnabled;
 
+/// set true to print logs. default value is false. only works when the DEBUG flag is YES
+- (void)setPrintLogs:(bool)printLogs;
+
 @end

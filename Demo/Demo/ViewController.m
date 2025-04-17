@@ -25,6 +25,8 @@
 {
     [super viewDidLoad];
 
+    [[MotionOrientation sharedInstance] setPrintLogs:true];
+
     // Register for MotionOrientation orientation changes
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(accelerometerUpdated:) name:MotionOrientationAccelerometerUpdatedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(motionDeviceOrientationChanged:) name:MotionOrientationChangedNotification object:nil];

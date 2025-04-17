@@ -49,6 +49,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
 @property (nonatomic, assign) int candidateNominationCount;
 @property (nonatomic, assign) bool useLowEnergeModeForcely;
 @property (nonatomic, assign) bool isEnabled;
+@property (nonatomic, assign) bool printLogs;
 
 @end
 
@@ -81,6 +82,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
     _accelerometerUpdateInterval = MO_ACCELEROMETER_UPDATE_INTERVAL_NORMAL_MODE;
     _useLowEnergeModeForcely = false;
     _isEnabled = true;
+    _printLogs = false;
 
     _candidateOrientation = UIDeviceOrientationUnknown;
     _deviceOrientation = UIDeviceOrientationPortrait;
@@ -92,7 +94,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
     _motionManager = [[CMMotionManager alloc] init];
     _motionManager.accelerometerUpdateInterval = _accelerometerUpdateInterval;
     if ( ![_motionManager isAccelerometerAvailable] ) {
-        NSLog(@"MotionOrientation - Accelerometer is NOT available");
+        NSLog(@"MotionOrientation - Accelerometer is NOT available"); // warning
 #if TARGET_OS_SIMULATOR
         [self simulatorInit];
 #endif
@@ -154,7 +156,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
 - (void)startAccelerometerUpdates
 {
 #if DEBUG
-    NSLog(@"MotionOrientation - startAccelerometerUpdates");
+    if (_printLogs) NSLog(@"MotionOrientation - startAccelerometerUpdates");
 #endif
     if(!_isEnabled) {
 #if DEBUG
@@ -164,12 +166,14 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
     }
 
     if (![_motionManager isAccelerometerAvailable]) {
-        NSLog(@"MotionOrientation - Accelerometer is NOT available");
+        NSLog(@"MotionOrientation - Accelerometer is NOT available"); // warning
         return;
     }
 
     if ([_motionManager isAccelerometerActive]) { // check already started
-        NSLog(@"MotionOrientation - Accelerometer is ALREADY Active");
+#if DEBUG
+        if (_printLogs) NSLog(@"MotionOrientation - Accelerometer is ALREADY Active");
+#endif
         return;
     }
     
@@ -181,7 +185,7 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
 - (void)stopAccelerometerUpdates
 {
 #if DEBUG
-    NSLog(@"MotionOrientation - stopAccelerometerUpdates");
+    if (_printLogs) NSLog(@"MotionOrientation - stopAccelerometerUpdates");
 #endif
     if ([_motionManager isAccelerometerActive]) {
         [_motionManager stopAccelerometerUpdates];
@@ -200,6 +204,10 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
     } else {
         [self stopAccelerometerUpdates];
     }
+}
+
+- (void)setPrintLogs:(bool)printLogs {
+    _printLogs = printLogs;
 }
 
 // MARK: - energe and app cycle
@@ -223,8 +231,8 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
     bool isNotCool = !(thermalState == NSProcessInfoThermalStateNominal || thermalState == NSProcessInfoThermalStateFair);
     bool isLowEnerge = isLowPowerModeEnabled || isNotCool || _useLowEnergeModeForcely;
 #if DEBUG
-    NSLog(@"MotionOrientation - updateLowEnergeMode: (%d, %@(%d)) + %d -> %d",
-          isLowPowerModeEnabled, [self stringDescriptionForThermalState:thermalState], isNotCool, _useLowEnergeModeForcely, isLowEnerge);
+    if (_printLogs) NSLog(@"MotionOrientation - updateLowEnergeMode: (%d, %@(%d)) + %d -> %d",
+                          isLowPowerModeEnabled, [self stringDescriptionForThermalState:thermalState], isNotCool, _useLowEnergeModeForcely, isLowEnerge);
 #endif
     [self setLowEnergeMode:isLowEnerge];
 }
@@ -256,7 +264,9 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
         return;
     }
     if (!accelerometerData) {
-        NSLog(@"MotionOrientation - accelerometerUpdateWithData: No data");
+#if DEBUG
+        if (_printLogs) NSLog(@"MotionOrientation - accelerometerUpdateWithData: No data");
+#endif
         return;
     }
 
@@ -281,17 +291,16 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
             float candidateDelayInSeconds = _accelerometerUpdateInterval * (float)_candidateNominationCount;
             if (candidateDelayInSeconds > MO_CANDIDATE_UPDATE_DELAY_IN_SECONDS) {
                 [self updateAndPostNewDeviceOrientation:estimatedOrientation withDebugData:debugData];
-//                [self updateLowEnergeMode]; // check and update low energe mode, in case the app became foreground from background
             }
         }
     }
 
 #ifdef DEBUG
     float candidateDelayInSeconds = _accelerometerUpdateInterval * (float)_candidateNominationCount;
-    NSLog(@"Motionorientation - estimated orientation: %@ -> %@ (candidate: %@, %d, %.2f)",
-          debugData, [self stringDescriptionForDeviceOrientation: estimatedOrientation],
-          [self stringDescriptionForDeviceOrientation:_candidateOrientation], _candidateNominationCount, candidateDelayInSeconds
-          );
+    if (_printLogs) NSLog(@"Motionorientation - estimated orientation: %@ -> %@ (candidate: %@, %d, %.2f)",
+                          debugData, [self stringDescriptionForDeviceOrientation: estimatedOrientation],
+                          [self stringDescriptionForDeviceOrientation:_candidateOrientation], _candidateNominationCount, candidateDelayInSeconds
+                          );
 
     // post a notification [DEBUG]
     [[NSNotificationCenter defaultCenter] postNotificationName:MotionOrientationAccelerometerUpdatedNotification object:nil userInfo:@{
@@ -348,18 +357,12 @@ NSString *const kMotionOrientationDebugDataKey = @"MotionOrientationDebugDataKey
 {
     switch (orientation)
     {
-        case UIDeviceOrientationPortrait:
-            return @"Portrait";
-        case UIDeviceOrientationPortraitUpsideDown:
-            return @"PortraitUpsideDown";
-        case UIDeviceOrientationLandscapeLeft:
-            return @"LandscapeLeft";
-        case UIDeviceOrientationLandscapeRight:
-            return @"LandscapeRight";
-        case UIDeviceOrientationFaceUp:
-            return @"FaceUp";
-        case UIDeviceOrientationFaceDown:
-            return @"FaceDown";
+        case UIDeviceOrientationPortrait:           return @"Portrait";
+        case UIDeviceOrientationPortraitUpsideDown: return @"PortraitUpsideDown";
+        case UIDeviceOrientationLandscapeLeft:      return @"LandscapeLeft";
+        case UIDeviceOrientationLandscapeRight:     return @"LandscapeRight";
+        case UIDeviceOrientationFaceUp:             return @"FaceUp";
+        case UIDeviceOrientationFaceDown:           return @"FaceDown";
         case UIDeviceOrientationUnknown:
         default:
             return @"Unknown";
